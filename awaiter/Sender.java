@@ -2,12 +2,13 @@ package awaiter;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
-
+import io.vertx.core.eventbus.Message;
+import io.vertx.ext.sync.SyncVerticle;
 
 /*
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
-public class Sender extends AbstractVerticle {
+public class Sender extends SyncVerticle {
 
 
 
@@ -19,13 +20,18 @@ public class Sender extends AbstractVerticle {
 
     vertx.setPeriodic(1000, v -> {
 
-      eb.send("ping-address", "ping!", reply -> {
-        if (reply.succeeded()) {
-          System.out.println("Received reply " + reply.result().body());
-        } else {
-          System.out.println("No reply");
-        }
-      });
+      Message<String> reply = awaitResult
+        (h -> eb.send("ping-address", "ping", h));
+
+      System.out.println("Received reply " + reply.body());
+
+//      eb.send("ping-address", "ping!", reply -> {
+//        if (reply.succeeded()) {
+//          System.out.println("Received reply " + reply.result().body());
+//        } else {
+//          System.out.println("No reply");
+//        }
+//      });
 
     });
   }
